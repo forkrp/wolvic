@@ -226,6 +226,16 @@ public class TrayWidget extends UIWidget implements WidgetManagerDelegate.Update
             view.requestFocusFromTouch();
         });
 
+        mBinding.downloadsButton.setOnHoverListener(mButtonScaleHoverListener);
+        mBinding.downloadsButton.setOnClickListener(view -> {
+            if (mAudio != null) {
+                mAudio.playSound(AudioEngine.Sound.CLICK);
+            }
+
+            notifyDownloadsClicked();
+            view.requestFocusFromTouch();
+        });
+
         mBinding.wifi.setOnHoverListener((view, motionEvent) -> {
             if (motionEvent.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
                 NotificationManager.Notification notification = new NotificationManager.Builder(TrayWidget.this)
@@ -490,6 +500,11 @@ public class TrayWidget extends UIWidget implements WidgetManagerDelegate.Update
         mTrayListeners.forEach(TrayListener::onLibraryClicked);
     }
 
+    private void notifyDownloadsClicked() {
+        hideNotifications();
+        mTrayListeners.forEach(TrayListener::onDownloadsClicked);
+    }
+
     @Override
     protected void initializeWidgetPlacement(WidgetPlacement aPlacement) {
         Context context = getContext();
@@ -568,6 +583,7 @@ public class TrayWidget extends UIWidget implements WidgetManagerDelegate.Update
 
         if (mViewModel != null) {
             mViewModel.getIsLibraryVisible().removeObserver(mIsLibraryVisible);
+            mViewModel.getIsDownloadsVisible().removeObserver(mIsDownloadsVisible);
             mViewModel.getIsPrivateSession().removeObserver(mIsPrivateSession);
             mViewModel = null;
         }
@@ -591,6 +607,7 @@ public class TrayWidget extends UIWidget implements WidgetManagerDelegate.Update
                 ViewModelProvider.AndroidViewModelFactory.getInstance(((VRBrowserActivity) getContext()).getApplication()))
                 .get(String.valueOf(mAttachedWindow.hashCode()), WindowViewModel.class);
         mViewModel.getIsLibraryVisible().observe((VRBrowserActivity)getContext(), mIsLibraryVisible);
+        mViewModel.getIsDownloadsVisible().observe((VRBrowserActivity)getContext(), mIsDownloadsVisible);
         mViewModel.getIsPrivateSession().observe((VRBrowserActivity)getContext(), mIsPrivateSession);
 
         mBinding.setViewmodel(mViewModel);
@@ -608,6 +625,17 @@ public class TrayWidget extends UIWidget implements WidgetManagerDelegate.Update
             animateViewPadding(mBinding.libraryButton, mMaxPadding, mMinPadding, ICON_ANIMATION_DURATION);
         } else {
             animateViewPadding(mBinding.libraryButton, mMinPadding, mMaxPadding, ICON_ANIMATION_DURATION);
+        }
+    };
+
+    private Observer<ObservableBoolean> mIsDownloadsVisible = aBoolean -> {
+        if (mBinding.downloadsButton.isHovered()) {
+            return;
+        }
+        if (aBoolean.get()) {
+            animateViewPadding(mBinding.downloadsButton, mMaxPadding, mMinPadding, ICON_ANIMATION_DURATION);
+        } else {
+            animateViewPadding(mBinding.downloadsButton, mMinPadding, mMaxPadding, ICON_ANIMATION_DURATION);
         }
     };
 
@@ -682,7 +710,7 @@ public class TrayWidget extends UIWidget implements WidgetManagerDelegate.Update
 
     public void showDownloadCompletedNotification(String filename) {
         showNotification(DOWNLOAD_COMPLETED_NOTIFICATION_ID,
-                mBinding.libraryButton,
+                mBinding.downloadsButton,
                 getContext().getString(R.string.download_completed_notification, filename));
     }
 
@@ -740,7 +768,7 @@ public class TrayWidget extends UIWidget implements WidgetManagerDelegate.Update
                         item.getStatus() == Download.PENDING).count();
         mTrayViewModel.setDownloadsNumber((int)inProgressNum);
         if (inProgressNum == 0) {
-            mBinding.libraryButton.setLevel(0);
+            mBinding.downloadsButton.setLevel(0);
 
         } else {
             long size = downloads.stream()
@@ -752,7 +780,7 @@ public class TrayWidget extends UIWidget implements WidgetManagerDelegate.Update
                     .sum();
             if (size > 0) {
                 long percent = downloaded*100/size;
-                mBinding.libraryButton.setLevel((int)percent*100);
+                mBinding.downloadsButton.setLevel((int)percent*100);
             }
         }
     }
