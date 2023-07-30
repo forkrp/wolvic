@@ -48,6 +48,9 @@ public class WindowViewModel extends AndroidViewModel {
     private MutableLiveData<ObservableBoolean> isActiveWindow;
     private MediatorLiveData<ObservableBoolean> isTitleBarVisible;
     private MutableLiveData<ObservableBoolean> isLibraryVisible;
+    private MutableLiveData<ObservableBoolean> isDownloadsVisible;
+    private MutableLiveData<ObservableBoolean> isWebAppsVisible;
+    private MutableLiveData<ObservableBoolean> isAddonsVisible;
     private MutableLiveData<ObservableBoolean> isLoading;
     private MutableLiveData<ObservableBoolean> isMicrophoneEnabled;
     private MutableLiveData<ObservableBoolean> isBookmarked;
@@ -127,6 +130,9 @@ public class WindowViewModel extends AndroidViewModel {
         isTitleBarVisible.setValue(new ObservableBoolean(true));
 
         isLibraryVisible = new MutableLiveData<>(new ObservableBoolean(false));
+        isDownloadsVisible = new MutableLiveData<>(new ObservableBoolean(false));
+        isWebAppsVisible = new MutableLiveData<>(new ObservableBoolean(false));
+        isAddonsVisible = new MutableLiveData<>(new ObservableBoolean(false));
 
         isLoading = new MutableLiveData<>(new ObservableBoolean(false));
         isMicrophoneEnabled = new MutableLiveData<>(new ObservableBoolean(true));
@@ -150,6 +156,9 @@ public class WindowViewModel extends AndroidViewModel {
         isInsecureVisible.addSource(isInsecure, mIsInsecureVisibleObserver);
         isInsecureVisible.addSource(isPrivateSession, mIsInsecureVisibleObserver);
         isInsecureVisible.addSource(isLibraryVisible, mIsInsecureVisibleObserver);
+        isInsecureVisible.addSource(isDownloadsVisible, mIsInsecureVisibleObserver);
+        isInsecureVisible.addSource(isWebAppsVisible, mIsInsecureVisibleObserver);
+        isInsecureVisible.addSource(isAddonsVisible, mIsInsecureVisibleObserver);
         isInsecureVisible.setValue(new ObservableBoolean(false));
 
         isMediaAvailable = new MutableLiveData<>(new ObservableBoolean(false));
@@ -171,6 +180,9 @@ public class WindowViewModel extends AndroidViewModel {
         isUrlBarButtonsVisible.addSource(isPopUpAvailable, mIsUrlBarButtonsVisibleObserver);
         isUrlBarButtonsVisible.addSource(isWebXRUsed, mIsUrlBarButtonsVisibleObserver);
         isUrlBarButtonsVisible.addSource(isLibraryVisible, mIsUrlBarButtonsVisibleObserver);
+        isUrlBarButtonsVisible.addSource(isDownloadsVisible, mIsUrlBarButtonsVisibleObserver);
+        isUrlBarButtonsVisible.addSource(isWebAppsVisible, mIsUrlBarButtonsVisibleObserver);
+        isUrlBarButtonsVisible.addSource(isAddonsVisible, mIsUrlBarButtonsVisibleObserver);
         isUrlBarButtonsVisible.addSource(isFocused, mIsUrlBarButtonsVisibleObserver);
         isUrlBarButtonsVisible.setValue(new ObservableBoolean(false));
 
@@ -229,6 +241,15 @@ public class WindowViewModel extends AndroidViewModel {
             if (isLibraryVisible.getValue().get()) {
                 url = getApplication().getString(R.string.url_library_title);
 
+            } else if (isDownloadsVisible.getValue().get()) {
+                url = getApplication().getString(R.string.url_downloads_title);
+
+            } else if (isWebAppsVisible.getValue().get()) {
+                url = getApplication().getString(R.string.url_downloads_title);
+
+            } else if (isAddonsVisible.getValue().get()) {
+                url = getApplication().getString(R.string.url_addons_title);
+
             } else {
                 if (UrlUtils.isPrivateAboutPage(getApplication(), url) ||
                         (UrlUtils.isDataUri(url) && isPrivateSession.getValue().get())) {
@@ -259,6 +280,9 @@ public class WindowViewModel extends AndroidViewModel {
                         UrlUtils.isFileUri(aUrl) ||
                         UrlUtils.isHomeUri(getApplication(), aUrl) ||
                         isLibraryVisible.getValue().get() ||
+                        isDownloadsVisible.getValue().get() ||
+                        isWebAppsVisible.getValue().get() ||
+                        isAddonsVisible.getValue().get() ||
                         UrlUtils.isBlankUri(getApplication(), aUrl)) {
                     isInsecureVisible.postValue(new ObservableBoolean(false));
 
@@ -280,6 +304,9 @@ public class WindowViewModel extends AndroidViewModel {
                     (UrlUtils.isDataUri(url) && isPrivateSession.getValue().get()) ||
                     UrlUtils.isHomeUri(getApplication(), aUrl.toString()) ||
                     isLibraryVisible.getValue().get() ||
+                    isDownloadsVisible.getValue().get() ||
+                    isWebAppsVisible.getValue().get() ||
+                    isAddonsVisible.getValue().get() ||
                     UrlUtils.isBlankUri(getApplication(), aUrl.toString())) {
                 navigationBarUrl.postValue("");
 
@@ -296,6 +323,9 @@ public class WindowViewModel extends AndroidViewModel {
             isUrlBarButtonsVisible.postValue(new ObservableBoolean(
                     !isFocused.getValue().get() &&
                             !isLibraryVisible.getValue().get() &&
+                            !isDownloadsVisible.getValue().get() &&
+                            !isWebAppsVisible.getValue().get() &&
+                            !isAddonsVisible.getValue().get() &&
                             !UrlUtils.isContentFeed(getApplication(), aUrl) &&
                             !UrlUtils.isPrivateAboutPage(getApplication(), aUrl) &&
                             (URLUtil.isHttpUrl(aUrl) || URLUtil.isHttpsUrl(aUrl)) &&
@@ -315,6 +345,9 @@ public class WindowViewModel extends AndroidViewModel {
         public void onChanged(ObservableBoolean o) {
             isUrlBarIconsVisible.postValue(new ObservableBoolean(
                     !isLibraryVisible.getValue().get() &&
+                            !isDownloadsVisible.getValue().get() &&
+                            !isWebAppsVisible.getValue().get() &&
+                            !isAddonsVisible.getValue().get() &&
                             (isLoading.getValue().get() ||
                                     isInsecureVisible.getValue().get())
             ));
@@ -427,6 +460,15 @@ public class WindowViewModel extends AndroidViewModel {
     private String getHintValue() {
         if (isLibraryVisible.getValue().get()) {
             return getApplication().getString(R.string.url_library_title);
+
+        } else if (isDownloadsVisible.getValue().get()) {
+            return getApplication().getString(R.string.url_downloads_title);
+
+        } else if (isWebAppsVisible.getValue().get()) {
+            return getApplication().getString(R.string.url_webapps_title);
+
+        } else if (isAddonsVisible.getValue().get()) {
+            return getApplication().getString(R.string.url_addons_title);
 
         } else {
             return getApplication().getString(R.string.search_placeholder);
@@ -557,6 +599,21 @@ public class WindowViewModel extends AndroidViewModel {
         this.url.postValue(this.getUrl().getValue());
     }
 
+    public void setIsDownloadsVisible(boolean isDownloadsVisible) {
+        this.isDownloadsVisible.postValue(new ObservableBoolean(isDownloadsVisible));
+        this.url.postValue(this.getUrl().getValue());
+    }
+
+    public void setIsWebAppsVisible(boolean isWebAppsVisible) {
+        this.isWebAppsVisible.postValue(new ObservableBoolean(isWebAppsVisible));
+        this.url.postValue(this.getUrl().getValue());
+    }
+
+    public void setIsAddonsVisible(boolean isAddonsVisible) {
+        this.isAddonsVisible.postValue(new ObservableBoolean(isAddonsVisible));
+        this.url.postValue(this.getUrl().getValue());
+    }
+
     public void setIsPanelVisible(boolean isVisible) {
         setIsLibraryVisible(isVisible);
     }
@@ -564,6 +621,21 @@ public class WindowViewModel extends AndroidViewModel {
     @NonNull
     public MutableLiveData<ObservableBoolean> getIsLibraryVisible() {
         return isLibraryVisible;
+    }
+
+    @NonNull
+    public MutableLiveData<ObservableBoolean> getIsDownloadsVisible() {
+        return isDownloadsVisible;
+    }
+
+    @NonNull
+    public MutableLiveData<ObservableBoolean> getIsWebAppsVisible() {
+        return isWebAppsVisible;
+    }
+
+    @NonNull
+    public MutableLiveData<ObservableBoolean> getIsAddonsVisible() {
+        return isAddonsVisible;
     }
 
     @NonNull
@@ -626,7 +698,7 @@ public class WindowViewModel extends AndroidViewModel {
     }
 
     public void setIsFindInPage(boolean isFindInPage) {
-        this.isFindInPage.postValue(new ObservableBoolean(isFindInPage));
+        this.isFindInPage.setValue(new ObservableBoolean(isFindInPage));
     }
 
     @NonNull

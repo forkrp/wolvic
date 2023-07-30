@@ -1282,6 +1282,16 @@ public class NavigationBarWidget extends UIWidget implements WSession.Navigation
         }
     }
 
+    @Override
+    public void onDownloadsClicked() {
+        onLibraryClicked();
+    }
+
+    @Override
+    public void onWebAppsClicked() {
+        onLibraryClicked();
+    }
+
     private void finishWidgetResize() {
         mWidgetManager.finishWidgetResize(mAttachedWindow);
     }
@@ -1318,7 +1328,7 @@ public class NavigationBarWidget extends UIWidget implements WSession.Navigation
             @Override
             public void onFindInPage() {
                 hideMenu();
-                mAttachedWindow.hidePanel();
+                mAttachedWindow.hideAllPanel();
 
                 mViewModel.setIsFindInPage(true);
             }
@@ -1362,11 +1372,11 @@ public class NavigationBarWidget extends UIWidget implements WSession.Navigation
             public void onAddons() {
                 hideMenu();
 
-                if (!mAttachedWindow.isLibraryVisible()) {
-                    mAttachedWindow.switchPanel(Windows.ADDONS);
+                if (!mAttachedWindow.isAddonsVisible()) {
+                    mAttachedWindow.switchAddonsPanel();
 
                 } else if (mAttachedWindow.getSelectedPanel() != Windows.ADDONS) {
-                    mAttachedWindow.showPanel(Windows.ADDONS);
+                    mAttachedWindow.showAddonsPanel();
                 }
             }
 
