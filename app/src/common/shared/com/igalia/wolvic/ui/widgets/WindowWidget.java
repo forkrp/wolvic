@@ -114,6 +114,7 @@ public class WindowWidget extends UIWidget implements SessionChangeListener,
     private int mHeight;
     private int mHandle;
     private TopBarWidget mTopBar;
+    private TopTabsWidget mTopTabs;
     private TitleBarWidget mTitleBar;
     private WidgetManagerDelegate mWidgetManager;
     private PromptDialogWidget mAlertDialog;
@@ -233,6 +234,9 @@ public class WindowWidget extends UIWidget implements SessionChangeListener,
 
         mTopBar = new TopBarWidget(aContext);
         mTopBar.attachToWindow(this);
+
+        mTopTabs = new TopTabsWidget(aContext);
+        mTopTabs.attachToWindow(this);
 
         mTitleBar = new TitleBarWidget(aContext);
         mTitleBar.attachToWindow(this);
@@ -402,6 +406,10 @@ public class WindowWidget extends UIWidget implements SessionChangeListener,
         if (mTopBar != null) {
             mWidgetManager.removeWidget(mTopBar);
             mTopBar.setDelegate((TopBarWidget.Delegate) null);
+        }
+        if (mTopTabs != null) {
+            mWidgetManager.removeWidget(mTopTabs);
+            mTopTabs.setDelegate((TopTabsWidget.Delegate) null);
         }
         if (mTitleBar != null) {
             mWidgetManager.removeWidget(mTitleBar);
@@ -912,6 +920,17 @@ public class WindowWidget extends UIWidget implements SessionChangeListener,
         if (mTopBar != aWidget) {
             mTopBar = aWidget;
             mTopBar.attachToWindow(this);
+        }
+    }
+
+    public TopTabsWidget getTopTabs() {
+        return mTopTabs;
+    }
+
+    public void setTopTabs(TopTabsWidget aWidget) {
+        if (mTopTabs != aWidget) {
+            mTopTabs = aWidget;
+            mTopTabs.attachToWindow(this);
         }
     }
 
