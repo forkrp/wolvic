@@ -904,6 +904,10 @@ public class KeyboardWidget extends UIWidget implements CustomKeyboardView.OnKey
 
         mCurrentKeyboard = aKeyboard;
 
+        if (aKeyboard.needsDatabase()) {
+            mWidgetManager.getServicesProvider().getDictionariesManager().getOrDownloadDictionary(aKeyboard.getLocale().toString());
+        }
+
         // For the case when switching from a symbol keyboard to a alphabetic keyboard.
         float currentHeight = 0.0f;
         if (mKeyboardView.getKeyboard() == mCurrentKeyboard.getSymbolsKeyboard()) {
